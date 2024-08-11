@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Tournament Begins{% endblock %}
+
+{% block content %}
+    <h2>{{ tournament.name }} Begins</h2>
+    <p>All teams and games have been added. Generate team numbers and schedule the games.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Generate Team Numbers and Schedule</button>
+    </form>
+{% endblock %}

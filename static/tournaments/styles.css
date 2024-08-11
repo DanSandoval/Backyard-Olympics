@@ -1,0 +1,11 @@
+.team-name {
+    display: inline-block;
+    min-width: 20ch; /* Minimum space equivalent to 20 characters */
+    margin-right: 10px; /* Space between name and members */
+    white-space: nowrap; /* Prevent name from wrapping */
+}
+
+.team-members {
+    display: inline-block;
+    white-space: nowrap; /* Prevent members from wrapping */
+}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Add Teams{% endblock %}
+
+{% block content %}
+    <h2>Add Teams to {{ tournament.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Team</button>
+    </form>
+    <h3>Current Teams</h3>
+    <ul>
+        {% for team in tournament.teams.all %}
+            <li>{{ team.name }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

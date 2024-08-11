@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Choose or Create Tournament{% endblock %}
+
+{% block content %}
+    <h2>Choose or Create Tournament</h2>
+    <p><a href="{% url 'create_tournament' %}">Create Tournament</a></p>
+    <h3>Select an Existing Tournament</h3>
+    <ul>
+        {% for tournament in tournaments %}
+            <li><a href="{% url 'select_tournament' tournament.pk %}">{{ tournament.name }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

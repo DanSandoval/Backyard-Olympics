@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Team List{% endblock %}
+
+{% block content %}
+    <h2>Teams in {{ tournament.name }}</h2>
+    
+    <h3>Add a New Team</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="add_team">Add Team</button>
+    </form>
+
+    <h3>Current Teams in "<a href="{% url 'tournament_review' tournament.pk %}">{{ tournament.name }}</a>" Tournament</h3>
+    <ul>
+        {% for team in teams %}
+            <li>
+                <span class="team-name">{{ team.name }}</span>
+                <span class="team-members">{{ team.members|default:"No members added yet" }}</span>
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="team_id" value="{{ team.id }}">
+                    <button type="submit" name="remove_team">Remove</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="{% url 'tournament_review' tournament.pk %}">Back to Tournament Review</a></p>
+{% endblock %}

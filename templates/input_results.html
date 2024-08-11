@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Input Results{% endblock %}
+
+{% block content %}
+    <h2>Input Results for {{ tournament.name }}</h2>
+    <h3>Round Progression</h3>
+    <!-- Round progression logic -->
+    <form method="post">
+        {% csrf_token %}
+        {% for game in games %}
+            <h4>{{ game.team1.number }} vs {{ game.team2.number }}</h4>
+            <label for="winner_{{ game.id }}">Winner:</label>
+            <select name="winner_{{ game.id }}" id="winner_{{ game.id }}">
+                <option value="{{ game.team1.id }}">{{ game.team1.number }}</option>
+                <option value="{{ game.team2.id }}">{{ game.team2.number }}</option>
+            </select>
+        {% endfor %}
+        <button type="submit">Submit Results</button>
+    </form>
+{% endblock %}

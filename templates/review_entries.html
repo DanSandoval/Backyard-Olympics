@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Review Entries{% endblock %}
+
+{% block content %}
+    <h2>{{ tournament.name }} Review</h2>
+    <h3>Teams</h3>
+    <ul>
+        {% for team in teams %}
+            <li>{{ team.name }} ({{ team.number }})</li>
+        {% endfor %}
+    </ul>
+    <h3>Games</h3>
+    <ul>
+        {% for game in games %}
+            <li>{{ game.team1 }} vs {{ game.team2 }}</li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'print_grids' tournament.pk %}">Print Grids</a></p>
+    <p><a href="{% url 'input_results' tournament.pk %}">Input Results</a></p>
+{% endblock %}

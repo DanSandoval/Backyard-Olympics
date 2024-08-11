@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Team List{% endblock %}
+
+{% block content %}
+    <h2>Teams in {{ tournament.name }}</h2>
+    <ul>
+        {% for team in teams %}
+            <li>{{ team.name }}{% if team.number %} ({{ team.number }}){% endif %}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

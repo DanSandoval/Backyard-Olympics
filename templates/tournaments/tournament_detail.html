@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tournament.name }}{% endblock %}
+
+{% block content %}
+    <h2>{{ tournament.name }}</h2>
+    <p>{{ tournament.description }}</p>
+    <h3>Teams</h3>
+    <ul>
+        {% for team in tournament.teams.all %}
+            <li><a href="{% url 'team_detail' tournament.pk team.pk %}">{{ team.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'create_team' tournament.pk %}">Add a new team</a></p>
+    <h3>Games</h3>
+    <ul>
+        {% for game in tournament.games.all %}
+            <li><a href="{% url 'game_detail' tournament.pk game.pk %}">{{ game.team1 }} vs {{ game.team2 }}</a></li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'create_game' tournament.pk %}">Schedule a new game</a></p>
+{% endblock %}

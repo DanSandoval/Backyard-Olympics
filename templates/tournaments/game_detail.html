@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Game Detail{% endblock %}
+
+{% block content %}
+    <h2>{{ game.team1 }} vs {{ game.team2 }}</h2>
+    <p>Date: {{ game.date }}</p>
+    <p>Location: {{ game.location }}</p>
+    {% if game.winner %}
+        <p>Winner: {{ game.winner }}</p>
+    {% endif %}
+{% endblock %}

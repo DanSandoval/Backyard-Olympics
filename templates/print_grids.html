@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Print Grids{% endblock %}
+
+{% block content %}
+    <h2>Print Grids for {{ tournament.name }}</h2>
+    <p>Click the button below to print the tournament grids.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Print Grids</button>
+    </form>
+{% endblock %}
