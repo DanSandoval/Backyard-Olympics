@@ -1,21 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Review Entries{% endblock %}
+{% block title %}{{ tournament.name }} Review Entries{% endblock %}
 
 {% block content %}
-    <h2>{{ tournament.name }} Review</h2>
+    <h2>{{ tournament.name }} Review Entries</h2>
+
     <h3>Teams</h3>
     <ul>
         {% for team in teams %}
-            <li>{{ team.name }} ({{ team.number }})</li>
+            <li>{{ team.name }} - Members: {{ team.members }}</li>
         {% endfor %}
     </ul>
+
     <h3>Games</h3>
-    <ul>
-        {% for game in games %}
-            <li>{{ game.team1 }} vs {{ game.team2 }}</li>
-        {% endfor %}
-    </ul>
+    {% if games %}
+        <ul>
+            {% for game in games %}
+                <li>{{ game.name }} - {{ game.description }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No games have been scheduled yet.</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'generate_matchups' tournament.pk %}">
+        {% csrf_token %}
+        <button type="submit">Generate Matchups and Schedule</button>
+    </form>
+
+    <form method="post" action="{% url 'reset_tournament' tournament.pk %}">
+        {% csrf_token %}
+        <button type="submit">Reset Tournament</button>
+    </form>
+
     <p><a href="{% url 'print_grids' tournament.pk %}">Print Grids</a></p>
     <p><a href="{% url 'input_results' tournament.pk %}">Input Results</a></p>
+    <p><a href="{% url 'tournament_review' tournament.pk %}">Back to Tournament Review</a></p>
 {% endblock %}

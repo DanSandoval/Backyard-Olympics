@@ -19,9 +19,12 @@ class Team(models.Model):
         return self.name
 
 class Game(models.Model):
-    name = models.CharField(max_length=100)  # Name of the game
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    team1 = models.ForeignKey(Team, related_name='home_games', on_delete=models.CASCADE, null=True, blank=True)
+    team2 = models.ForeignKey(Team, related_name='away_games', on_delete=models.CASCADE, null=True, blank=True)
+    round_number = models.IntegerField(null=True, blank=True)
     tournament = models.ForeignKey(Tournament, related_name='games', on_delete=models.CASCADE)
-    description = models.TextField(blank=True, null=True)  # Optional field for game description
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.team1.name} vs {self.team2.name} - Round {self.round_number}"

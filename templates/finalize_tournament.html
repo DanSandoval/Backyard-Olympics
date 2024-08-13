@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Finalize Tournament{% endblock %}
+
+{% block content %}
+    <h2>Finalize Tournament: {{ tournament.name }}</h2>
+
+    <h3>Teams</h3>
+    <ul>
+        {% for team in teams %}
+            <li>{{ team.name }} - Members: {{ team.members }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Games</h3>
+    <ul>
+        {% for game in games %}
+            <li>{{ game.name }} - {{ game.description }}</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Generate Matchups</button>
+    </form>
+
+    <p><a href="{% url 'tournament_review' tournament.pk %}">Back to Tournament Review</a></p>
+{% endblock %}

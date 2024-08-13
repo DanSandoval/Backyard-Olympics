@@ -20,4 +20,9 @@ class TeamForm(forms.ModelForm):
 class GameForm(forms.ModelForm):
     class Meta:
         model = Game
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'team1', 'team2', 'round_number']
+        widgets = {
+            'team1': forms.HiddenInput(),  # Optional: You can hide these fields for now
+            'team2': forms.HiddenInput(),  # Optional: You can hide these fields for now
+            'round_number': forms.HiddenInput()  # Optional: You can hide these fields for now
+        }

@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Tournament Review{% endblock %}
+{% block title %}{{ tournament.name }} Review{% endblock %}
 
 {% block content %}
     <h2>{{ tournament.name }} Review</h2>
     <p>{{ tournament.description }}</p>
     <p><a href="{% url 'team_list' tournament.pk %}">Team List</a></p>
     <p><a href="{% url 'game_list' tournament.pk %}">Game List</a></p>
-    <p><a href="{% url 'tournament_begins' tournament.pk %}">Begin Tournament</a></p>
+
+    {% if tournament.teams.exists %}
+        <p><a href="{% url 'review_entries' tournament.pk %}">Review Tournament Entries</a></p>
+    {% endif %}
+
+    {% if not teams_with_numbers %}
+        <p><a href="{% url 'finalize_tournament' tournament.pk %}">Finalize Tournament and Assign Teams</a></p>
+    {% endif %}
 {% endblock %}
