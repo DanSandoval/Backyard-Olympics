@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="wager-form">
+    <h1>Place Your Wagers</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="remaining-points">
+            Points Remaining: <span id="remaining">100</span>
+        </div>
+
+        {% for game_data in games %}
+        <div class="form-group">
+            <label for="game_{{ game_data.game.id }}">
+                {{ game_data.game.name }}
+            </label>
+            <input type="number" 
+                   class="form-control wager-input" 
+                   id="game_{{ game_data.game.id }}"
+                   name="game_{{ game_data.game.id }}"
+                   value="{{ game_data.points }}"
+                   min="0" 
+                   max="100">
+        </div>
+        {% endfor %}
+
+        <button type="submit" 
+                class="btn btn-primary"
+                id="submit-btn" 
+                disabled>Save Wagers</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.wager-input');
+    const remainingSpan = document.getElementById('remaining');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function updateRemaining() {
+        let total = 0;
+        inputs.forEach(input => {
+            total += parseInt(input.value || 0);
+        });
+        
+        const remaining = 100 - total;
+        remainingSpan.textContent = remaining;
+        
+        // Enable submit only if total is exactly 100
+        submitBtn.disabled = total !== 100;
+        
+        // Update color based on remaining points
+        if (remaining < 0) {
+            remainingSpan.style.color = 'red';
+        } else if (remaining > 0) {
+            remainingSpan.style.color = 'blue';
+        } else {
+            remainingSpan.style.color = 'green';
+        }
+    }
+
+    inputs.forEach(input => {
+        input.addEventListener('input', updateRemaining);
+    });
+
+    updateRemaining();
+});
+</script>
+{% endblock %} 

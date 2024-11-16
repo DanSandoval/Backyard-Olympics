@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Tournament Schedule</h2>
+
+{% for round in rounds %}
+    <div class="round-section">
+        <h3>Round {{ round.round_number }}</h3>
+        <p>Start Time: {{ round.start_time|date:"F j, Y, g:i a" }}</p>
+        
+        <div class="matchups">
+            {% for matchup in round.matchups.all %}
+                <div class="matchup-card">
+                    <h4>{{ matchup.game.name }}</h4>
+                    <p>{{ matchup.team_1.name }} vs 
+                       {% if matchup.team_2 %}
+                           {{ matchup.team_2.name }}
+                       {% else %}
+                           BYE
+                       {% endif %}
+                    </p>
+                    
+                    {% if matchup.result_confirmed %}
+                        <span class="badge badge-success">Completed</span>
+                    {% elif matchup.conflict_flag %}
+                        <span class="badge badge-warning">Disputed</span>
+                    {% else %}
+                        <a href="{% url 'matchup_result' matchup.pk %}" 
+                           class="btn btn-sm btn-primary">
+                            Enter Result
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+{% endblock %} 

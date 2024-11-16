@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="notifications-list">
+    <h1>Notifications</h1>
+    
+    {% for notification in notifications %}
+    <div class="notification-card {% if not notification.read_at %}unread{% endif %}"
+         data-notification-id="{{ notification.id }}">
+        <div class="notification-header">
+            <span class="badge badge-{{ notification.priority|lower }}">
+                {{ notification.get_type_display }}
+            </span>
+            <span class="notification-time">
+                {{ notification.created_at|timesince }} ago
+            </span>
+        </div>
+        
+        <h3>{{ notification.title }}</h3>
+        <p>{{ notification.message }}</p>
+        
+        {% if notification.related_matchup %}
+        <div class="related-content">
+            <a href="{% url 'matchup_detail' notification.related_matchup.id %}">
+                View Matchup
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if not notification.read_at %}
+        <button class="mark-read-btn btn btn-sm btn-outline-primary">
+            Mark as Read
+        </button>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>No notifications</p>
+    {% endfor %}
+    
+    {% include 'includes/pagination.html' %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const markReadButtons = document.querySelectorAll('.mark-read-btn');
+    
+    markReadButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const card = this.closest('.notification-card');
+            const notificationId = card.dataset.notificationId;
+            
+            fetch(`/notifications/${notificationId}/mark-read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    card.classList.remove('unread');
+                    this.remove();
+                }
+            });
+        });
+    });
+});
+
+function getCookie(name) {
+    // CSRF token cookie getter implementation
+}
+</script>
+{% endblock %} 

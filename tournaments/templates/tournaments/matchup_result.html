@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Enter Result</h2>
+<div class="matchup-details">
+    <h3>{{ matchup.game.name }} - Round {{ matchup.round.round_number }}</h3>
+    <p>{{ matchup.team_1.name }} vs {{ matchup.team_2.name }}</p>
+    
+    {% if matchup.result_confirmed %}
+        <div class="alert alert-success">
+            Result confirmed: {{ matchup.winner.name }} won
+        </div>
+    {% elif matchup.conflict_flag %}
+        <div class="alert alert-warning">
+            Result disputed - waiting for admin review
+        </div>
+    {% else %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Submit Result</button>
+        </form>
+    {% endif %}
+</div>
+{% endblock %} 

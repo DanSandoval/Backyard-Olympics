@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="team-dashboard">
+    <h1>{{ team.name }} Dashboard</h1>
+    
+    <!-- Current Round Section -->
+    {% if current_round %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Current Round: {{ current_round.round_number }}</h2>
+            <p>Time Remaining: <span id="countdown"></span></p>
+        </div>
+        <div class="card-body">
+            {% if current_matchups %}
+                {% for matchup in current_matchups %}
+                <div class="matchup-card">
+                    <h3>{{ matchup.game.name }}</h3>
+                    <p>vs {{ matchup.team_2.name|default:"BYE" }}</p>
+                    {% if not matchup.result_confirmed %}
+                        <a href="{% url 'matchup_result' matchup.pk %}" 
+                           class="btn btn-primary">Enter Result</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No current matchups</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Upcoming Matchups -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Upcoming Matchups</h2>
+        </div>
+        <div class="card-body">
+            {% if upcoming_matchups %}
+                {% for matchup in upcoming_matchups %}
+                <div class="matchup-preview">
+                    <p>Round {{ matchup.round.round_number }} - {{ matchup.game.name }}</p>
+                    <p>{{ matchup.start_time|date:"g:i A" }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No upcoming matchups</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Wagers Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Your Wagers</h2>
+            <p>Remaining Points: {{ remaining_wager_points }}</p>
+        </div>
+        <div class="card-body">
+            {% if wagers %}
+                {% for wager in wagers %}
+                <div class="wager-item">
+                    <span>{{ wager.game.name }}</span>
+                    <span class="badge badge-primary">{{ wager.points }} points</span>
+                </div>
+                {% endfor %}
+                {% if remaining_wager_points > 0 %}
+                    <a href="{% url 'wager_form' team.pk %}" 
+                       class="btn btn-warning">Update Wagers</a>
+                {% endif %}
+            {% else %}
+                <p>No wagers placed</p>
+                <a href="{% url 'wager_form' team.pk %}" 
+                   class="btn btn-primary">Place Wagers</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="card">
+        <div class="card-header">
+            <h2>Tournament Stats</h2>
+        </div>
+        <div class="card-body">
+            <p>Wins: {{ wins }}</p>
+            <!-- Add more stats as needed -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Countdown timer for current round
+function updateCountdown() {
+    {% if current_round %}
+        const endTime = new Date("{{ current_round.end_time|date:'c' }}");
+        const now = new Date();
+        const diff = endTime - now;
+
+        if (diff > 0) {
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            document.getElementById('countdown').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        } else {
+            document.getElementById('countdown').textContent = 'Round Complete';
+        }
+    {% endif %}
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+{% endblock %} 
