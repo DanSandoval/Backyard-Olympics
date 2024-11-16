@@ -18,6 +18,8 @@ class Team(models.Model):
     def __str__(self):
         return self.name
 
+# models.py - Game model update
+
 class Game(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -25,6 +27,36 @@ class Game(models.Model):
     team2 = models.ForeignKey(Team, related_name='away_games', on_delete=models.CASCADE, null=True, blank=True)
     round_number = models.IntegerField(null=True, blank=True)
     tournament = models.ForeignKey(Tournament, related_name='games', on_delete=models.CASCADE)
+    
+    # New fields
+    winner = models.ForeignKey(
+        Team, 
+        related_name='games_won', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    score_team1 = models.IntegerField(null=True, blank=True)
+    score_team2 = models.IntegerField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('SCHEDULED', 'Scheduled'),
+            ('IN_PROGRESS', 'In Progress'),
+            ('COMPLETED', 'Completed')
+        ],
+        default='SCHEDULED'
+    )
+    date_played = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} - {self.team1.name} vs {self.team2.name} - Round {self.round_number}"
+        return f"{self.name} - {self.team1.name if self.team1 else 'TBD'} vs {self.team2.name if self.team2 else 'TBD'} - Round {self.round_number}"
+    
+    def determine_winner(self):
+        if self.score_team1 is not None and self.score_team2 is not None:
+            if self.score_team1 > self.score_team2:
+                self.winner = self.team1
+            elif self.score_team2 > self.score_team1:
+                self.winner = self.team2
+            self.status = 'COMPLETED'
+            self.save()
