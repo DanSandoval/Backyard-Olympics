@@ -1,21 +1,84 @@
 {% extends "base.html" %}
 
-{% block title %}Input Results{% endblock %}
+{% block title %}Input Results - {{ tournament.name }}{% endblock %}
 
 {% block content %}
     <h2>Input Results for {{ tournament.name }}</h2>
-    <h3>Round Progression</h3>
-    <!-- Round progression logic -->
-    <form method="post">
-        {% csrf_token %}
-        {% for game in games %}
-            <h4>{{ game.team1.number }} vs {{ game.team2.number }}</h4>
-            <label for="winner_{{ game.id }}">Winner:</label>
-            <select name="winner_{{ game.id }}" id="winner_{{ game.id }}">
-                <option value="{{ game.team1.id }}">{{ game.team1.number }}</option>
-                <option value="{{ game.team2.id }}">{{ game.team2.number }}</option>
-            </select>
-        {% endfor %}
-        <button type="submit">Submit Results</button>
-    </form>
+    
+    {% if current_round %}
+        <h3>Round {{ current_round.round_number }} Results</h3>
+        
+        <form method="post" class="results-form">
+            {% csrf_token %}
+            <table class="matchup-table">
+                <thead>
+                    <tr>
+                        <th>Game</th>
+                        <th>Team 1</th>
+                        <th>Team 2</th>
+                        <th>Winner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for matchup in matchups %}
+                        <tr {% if matchup.conflict_flag %}class="conflict"{% endif %}>
+                            <td>{{ matchup.game.name }}</td>
+                            <td>{{ matchup.team1.name }} ({{ matchup.team1.team_number }})</td>
+                            <td>
+                                {% if matchup.is_bye %}
+                                    BYE
+                                {% else %}
+                                    {{ matchup.team2.name }} ({{ matchup.team2.team_number }})
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if matchup.is_bye %}
+                                    <input type="hidden" name="winner_{{ matchup.id }}" value="{{ matchup.team1.id }}">
+                                    <span class="bye-win">{{ matchup.team1.name }} (BYE)</span>
+                                {% else %}
+                                    <select name="winner_{{ matchup.id }}" id="winner_{{ matchup.id }}">
+                                        <option value="">-- Select Winner --</option>
+                                        <option value="{{ matchup.team1.id }}" {% if matchup.result == 'TEAM1_WIN' %}selected{% endif %}>
+                                            {{ matchup.team1.name }} ({{ matchup.team1.team_number }})
+                                        </option>
+                                        <option value="{{ matchup.team2.id }}" {% if matchup.result == 'TEAM2_WIN' %}selected{% endif %}>
+                                            {{ matchup.team2.name }} ({{ matchup.team2.team_number }})
+                                        </option>
+                                    </select>
+                                    
+                                    {% if matchup.conflict_flag %}
+                                        <span class="conflict-badge">CONFLICT</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="form-actions">
+                <button type="submit" class="button primary">Save Results</button>
+                <a href="{% url 'review_entries' tournament.pk %}" class="button">Cancel</a>
+            </div>
+        </form>
+        
+        <div class="round-navigation">
+            <form method="post" action="{% url 'previous_round' tournament.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="button">Previous Round</button>
+            </form>
+            
+            <form method="post" action="{% url 'next_round' tournament.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="button">Next Round</button>
+            </form>
+        </div>
+    {% else %}
+        <p>No active round found.</p>
+    {% endif %}
+    
+    <div class="actions">
+        <a href="{% url 'tournament_review' tournament.pk %}" class="button">Back to Tournament Review</a>
+        <a href="{% url 'conflict_resolution' tournament.pk %}" class="button">Resolve Conflicts</a>
+    </div>
 {% endblock %}

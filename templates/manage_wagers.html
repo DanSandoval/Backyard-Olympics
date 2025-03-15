@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Wagers - {{ team.name }}{% endblock %}
+
+{% block content %}
+    <h2>Manage Wagers for {{ team.name }}</h2>
+    <p>Allocate 100 points across the games. The points will be used for tie-breaking.</p>
+    
+    <div class="wager-summary">
+        <h3>Current Total: <span id="points-total">{{ total_points }}</span>/100</h3>
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ total_points }}%;"></div>
+        </div>
+    </div>
+    
+    <form method="post" id="wager-form">
+        {% csrf_token %}
+        <table class="wager-table">
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th>Description</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                    <tr>
+                        <td>{{ game.name }}</td>
+                        <td>{{ game.description }}</td>
+                        <td>
+                            <input type="number" name="points_{{ game.id }}" 
+                                   value="{{ game_points|get_item:game.id }}" 
+                                   min="0" max="100" class="wager-input"
+                                   data-game-id="{{ game.id }}">
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="form-actions">
+            <button type="submit" class="button primary" id="submit-button" disabled>Save Wagers</button>
+            <a href="{% url 'review_entries' tournament.pk %}" class="button">Cancel</a>
+        </div>
+    </form>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wagerInputs = document.querySelectorAll('.wager-input');
+            const totalDisplay = document.getElementById('points-total');
+            const submitButton = document.getElementById('submit-button');
+            const progressBar = document.querySelector('.progress');
+            
+            function updateTotal() {
+                let total = 0;
+                wagerInputs.forEach(input => {
+                    total += parseInt(input.value) || 0;
+                });
+                
+                totalDisplay.textContent = total;
+                progressBar.style.width = total + '%';
+                
+                if (total === 100) {
+                    submitButton.disabled = false;
+                    totalDisplay.classList.add('valid');
+                    totalDisplay.classList.remove('invalid');
+                } else {
+                    submitButton.disabled = true;
+                    totalDisplay.classList.add('invalid');
+                    totalDisplay.classList.remove('valid');
+                }
+            }
+            
+            wagerInputs.forEach(input => {
+                input.addEventListener('input', updateTotal);
+            });
+            
+            updateTotal();
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Team Details - {{ team.name }}{% endblock %}
+
+{% block content %}
+    <h2>Team Details: {{ team.name }}</h2>
+    
+    <div class="team-info">
+        <p><strong>Tournament:</strong> {{ team.tournament.name }}</p>
+        <p><strong>Team Number:</strong> {{ team.team_number }}</p>
+        <p><strong>Members:</strong> {{ team.members }}</p>
+        
+        {% if team.phone_number_1 or team.phone_number_2 or team.email_1 or team.email_2 %}
+            <h3>Contact Information</h3>
+            {% if team.phone_number_1 %}
+                <p><strong>Primary Phone:</strong> {{ team.phone_number_1 }}</p>
+            {% endif %}
+            {% if team.phone_number_2 %}
+                <p><strong>Secondary Phone:</strong> {{ team.phone_number_2 }}</p>
+            {% endif %}
+            {% if team.email_1 %}
+                <p><strong>Primary Email:</strong> {{ team.email_1 }}</p>
+            {% endif %}
+            {% if team.email_2 %}
+                <p><strong>Secondary Email:</strong> {{ team.email_2 }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+    
+    <h3>Team Access QR Code</h3>
+    <div class="qr-code">
+        <p>QR Code for team access:</p>
+        <img src="{% url 'team_qr_code' team.access_token %}" alt="Team Access QR Code">
+        <p class="token-info">Access Token: {{ team.access_token }}</p>
+    </div>
+    
+    <h3>Matchups</h3>
+    {% with team1_matchups=team.matchups_as_team1.all team2_matchups=team.matchups_as_team2.all %}
+        {% if team1_matchups or team2_matchups %}
+            <table class="matchup-table">
+                <thead>
+                    <tr>
+                        <th>Round</th>
+                        <th>Game</th>
+                        <th>Opponent</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for matchup in team1_matchups %}
+                        <tr>
+                            <td>{{ matchup.round.round_number }}</td>
+                            <td>{{ matchup.game.name }}</td>
+                            <td>
+                                {% if matchup.is_bye %}
+                                    BYE
+                                {% else %}
+                                    {{ matchup.team2.name }} ({{ matchup.team2.team_number }})
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if matchup.result == 'TEAM1_WIN' %}
+                                    Win
+                                {% elif matchup.result == 'TEAM2_WIN' %}
+                                    Loss
+                                {% else %}
+                                    Pending
+                                {% endif %}
+                                {% if matchup.conflict_flag %}
+                                    <span class="conflict-badge">CONFLICT</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    {% for matchup in team2_matchups %}
+                        <tr>
+                            <td>{{ matchup.round.round_number }}</td>
+                            <td>{{ matchup.game.name }}</td>
+                            <td>{{ matchup.team1.name }} ({{ matchup.team1.team_number }})</td>
+                            <td>
+                                {% if matchup.result == 'TEAM2_WIN' %}
+                                    Win
+                                {% elif matchup.result == 'TEAM1_WIN' %}
+                                    Loss
+                                {% else %}
+                                    Pending
+                                {% endif %}
+                                {% if matchup.conflict_flag %}
+                                    <span class="conflict-badge">CONFLICT</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No matchups scheduled yet.</p>
+        {% endif %}
+    {% endwith %}
+    
+    <h3>Wagers</h3>
+    {% with wagers=team.wagers.all %}
+        {% if wagers %}
+            <table class="wager-table">
+                <thead>
+                    <tr>
+                        <th>Game</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for wager in wagers %}
+                        <tr>
+                            <td>{{ wager.game.name }}</td>
+                            <td>{{ wager.points }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td><strong>Total</strong></td>
+                        <td><strong>{{ wagers|sum_wagers }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="wager-actions">
+                <a href="{% url 'manage_wagers' team.tournament.pk team.pk %}" class="button">Manage Wagers</a>
+            </div>
+        {% else %}
+            <p>No wagers set yet.</p>
+            <div class="wager-actions">
+                <a href="{% url 'manage_wagers' team.tournament.pk team.pk %}" class="button primary">Set Wagers</a>
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <div class="actions">
+        <a href="{% url 'team_list' team.tournament.pk %}" class="button">Back to Team List</a>
+        <a href="{% url 'tournament_review' team.tournament.pk %}" class="button">Back to Tournament Review</a>
+    </div>
+{% endblock %}

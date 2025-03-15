@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Team QR Code - {{ team.name }}{% endblock %}
+
+{% block content %}
+    <h2>QR Code for {{ team.name }}</h2>
+    
+    <div class="qr-container">
+        <div class="qr-code">
+            <img src="data:image/png;base64,{{ qr_code_image }}" alt="Team QR Code">
+        </div>
+        
+        <div class="qr-info">
+            <p><strong>Team:</strong> {{ team.name }}</p>
+            <p><strong>Tournament:</strong> {{ team.tournament.name }}</p>
+            <p><strong>Access Token:</strong> {{ team.access_token }}</p>
+            <p><strong>URL:</strong> <a href="{{ access_url }}">{{ access_url }}</a></p>
+        </div>
+    </div>
+    
+    <div class="print-instructions">
+        <h3>Instructions</h3>
+        <p>Print this QR code and provide it to the team. They can scan it to access their tournament information and report results.</p>
+        <button onclick="window.print()" class="button primary">Print QR Code</button>
+    </div>
+    
+    <div class="actions">
+        <a href="{% url 'team_detail' team.tournament.pk team.pk %}" class="button">Back to Team Details</a>
+        <a href="{% url 'tournament_review' team.tournament.pk %}" class="button">Back to Tournament Review</a>
+    </div>
+    
+    <style>
+        @media print {
+            header, footer, .actions, .print-instructions {
+                display: none !important;
+            }
+            
+            .qr-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin: 0 auto;
+                max-width: 100%;
+            }
+            
+            .qr-code img {
+                width: 100%;
+                max-width: 300px;
+                height: auto;
+            }
+        }
+        
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .qr-code {
+            margin-bottom: 20px;
+        }
+        
+        .qr-code img {
+            max-width: 300px;
+            height: auto;
+        }
+        
+        .qr-info {
+            text-align: center;
+        }
+    </style>
+{% endblock %}

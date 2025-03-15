@@ -1,12 +1,129 @@
 {% extends "base.html" %}
 
-{% block title %}Print Grids{% endblock %}
+{% block title %}Print Grids - {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    @media print {
+        header, footer, .actions, form {
+            display: none !important;
+        }
+        
+        .print-grid {
+            page-break-after: always;
+        }
+        
+        body, html {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    }
+    
+    .print-grid {
+        margin-bottom: 30px;
+    }
+    
+    .round-header {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    
+    .grid-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    
+    .grid-table th, .grid-table td {
+        border: 1px solid #333;
+        padding: 8px;
+        text-align: center;
+    }
+    
+    .grid-table th {
+        background-color: #f2f2f2;
+    }
+    
+    .bye {
+        background-color: #f9f9f9;
+        font-style: italic;
+    }
+    
+    .team-list {
+        columns: 2;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-    <h2>Print Grids for {{ tournament.name }}</h2>
-    <p>Click the button below to print the tournament grids.</p>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Print Grids</button>
-    </form>
+    <h2>Tournament Grids - {{ tournament.name }}</h2>
+    
+    <div class="actions">
+        <button onclick="window.print()" class="button primary">Print Grids</button>
+        <a href="{% url 'tournament_review' tournament.pk %}" class="button">Back to Tournament Review</a>
+    </div>
+    
+    <h3>Team Reference List</h3>
+    <div class="team-list">
+        {% for team in teams %}
+            <div>Team {{ team.team_number }}: {{ team.name }}</div>
+        {% endfor %}
+    </div>
+    
+    {% for data in grid_data %}
+        <div class="print-grid">
+            <div class="round-header">
+                <h3>Round {{ data.round.round_number }}</h3>
+                {% if data.round.start_time %}
+                    <p>Scheduled start: {{ data.round.start_time }}</p>
+                {% endif %}
+            </div>
+            
+            <table class="grid-table">
+                <thead>
+                    <tr>
+                        <th>Game</th>
+                        <th>Team 1</th>
+                        <th>Team 2</th>
+                        <th>Winner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for matchup in data.matchups %}
+                        <tr {% if matchup.is_bye %}class="bye"{% endif %}>
+                            <td>{{ matchup.game.name }}</td>
+                            <td>{{ matchup.team1.team_number }} ({{ matchup.team1.name }})</td>
+                            <td>
+                                {% if matchup.is_bye %}
+                                    BYE
+                                {% else %}
+                                    {{ matchup.team2.team_number }} ({{ matchup.team2.name }})
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if matchup.result == 'TEAM1_WIN' %}
+                                    {{ matchup.team1.team_number }}
+                                {% elif matchup.result == 'TEAM2_WIN' %}
+                                    {{ matchup.team2.team_number }}
+                                {% else %}
+                                    _____
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% empty %}
+        <div class="no-rounds">
+            <p>No rounds have been generated yet.</p>
+        </div>
+    {% endfor %}
+    
+    <div class="actions">
+        <button onclick="window.print()" class="button primary">Print Grids</button>
+        <a href="{% url 'tournament_review' tournament.pk %}" class="button">Back to Tournament Review</a>
+    </div>
 {% endblock %}

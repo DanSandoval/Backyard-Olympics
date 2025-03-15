@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Tournament Standings - {{ tournament.name }}{% endblock %}
+
+{% block content %}
+    <h2>{{ tournament.name }} Standings</h2>
+    
+    <table class="standings-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Number</th>
+                <th>Wins</th>
+                <th>Wager Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in team_stats %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ stat.team.name }}</td>
+                    <td>{{ stat.team.team_number }}</td>
+                    <td>{{ stat.wins }}</td>
+                    <td>{{ stat.wager_points }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="standings-note">
+        <h3>How Standings are Determined</h3>
+        <p>Teams are ranked by their total wins. In case of a tie, the team with the higher wager points takes precedence.</p>
+    </div>
+    
+    <div class="actions">
+        <a href="{% url 'tournament_review' tournament.pk %}" class="button">Back to Tournament Review</a>
+        <a href="{% url 'print_grids' tournament.pk %}" class="button">Print Grids</a>
+    </div>
+{% endblock %}

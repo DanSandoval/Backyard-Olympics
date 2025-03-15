@@ -5,14 +5,80 @@
 {% block content %}
     <h2>{{ tournament.name }} Review</h2>
     <p>{{ tournament.description }}</p>
-    <p><a href="{% url 'team_list' tournament.pk %}">Team List</a></p>
-    <p><a href="{% url 'game_list' tournament.pk %}">Game List</a></p>
-
-    {% if tournament.teams.exists %}
-        <p><a href="{% url 'review_entries' tournament.pk %}">Review Tournament Entries</a></p>
+    
+    <div class="dashboard-section">
+        <h3>Tournament Management</h3>
+        <a href="{% url 'team_list' tournament.pk %}" class="button">Manage Teams</a>
+        <a href="{% url 'game_list' tournament.pk %}" class="button">Manage Games</a>
+        
+        {% if not teams_with_numbers %}
+            <a href="{% url 'finalize_tournament' tournament.pk %}" class="button primary">Start Tournament</a>
+        {% endif %}
+    </div>
+    
+    {% if current_round %}
+        <div class="dashboard-section">
+            <h3>Current Round: {{ current_round.round_number }}</h3>
+            <p>Started: {{ current_round.start_time|default:"Not started" }}</p>
+            
+            <div class="round-navigation">
+                <form method="post" action="{% url 'previous_round' tournament.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="button">Previous Round</button>
+                </form>
+                
+                <a href="{% url 'review_entries' tournament.pk %}" class="button primary">Manage Current Round</a>
+                
+                <form method="post" action="{% url 'next_round' tournament.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="button">Next Round</button>
+                </form>
+            </div>
+        </div>
     {% endif %}
-
-    {% if not teams_with_numbers %}
-        <p><a href="{% url 'finalize_tournament' tournament.pk %}">Finalize Tournament and Assign Teams</a></p>
+    
+    <div class="dashboard-section">
+        <h3>Tournament Tools</h3>
+        {% if teams_with_numbers %}
+            <a href="{% url 'review_entries' tournament.pk %}" class="button">Review Tournament</a>
+            <a href="{% url 'tournament_standings' tournament.pk %}" class="button">View Standings</a>
+            <a href="{% url 'print_grids' tournament.pk %}" class="button">Print Grids</a>
+            <a href="{% url 'conflict_resolution' tournament.pk %}" class="button">Resolve Conflicts</a>
+            <a href="{% url 'create_notification' tournament.pk %}" class="button">Create Notification</a>
+        {% endif %}
+    </div>
+    
+    {% if teams_with_numbers %}
+        <div class="dashboard-section">
+            <h3>Team Wagers</h3>
+            <a href="{% url 'manage_wagers' tournament.pk %}" class="button">Manage Team Wagers</a>
+        </div>
+        
+        <div class="dashboard-section">
+            <h3>Tournament Reset</h3>
+            <form method="post" action="{% url 'reset_tournament' tournament.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="button danger" onclick="return confirm('Are you sure? This will reset all matchups and team assignments.')">Reset Tournament</button>
+            </form>
+        </div>
+    {% endif %}
+    
+    {% if notifications %}
+        <div class="dashboard-section notifications">
+            <h3>Active Notifications</h3>
+            <ul>
+                {% for notification in notifications %}
+                    <li>
+                        <strong>{{ notification.title }}</strong>
+                        <p>{{ notification.message }}</p>
+                        <small>{{ notification.created_at }}</small>
+                        <form method="post" action="{% url 'mark_notification_read' notification.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="button small">Mark as Read</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 {% endblock %}

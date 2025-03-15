@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Select Team for Wagers - {{ tournament.name }}{% endblock %}
+
+{% block content %}
+    <h2>Select Team to Manage Wagers</h2>
+    <p>Choose which team you want to allocate wager points for:</p>
+    
+    <table class="team-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Team</th>
+                <th>Members</th>
+                <th>Wager Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.team_number }}</td>
+                    <td>{{ team.name }}</td>
+                    <td>{{ team.members }}</td>
+                    <td>
+                        {% with wager_sum=team.wagers.all|sum_wagers %}
+                            {% if wager_sum == 100 %}
+                                <span class="badge complete">Complete (100)</span>
+                            {% elif wager_sum > 0 %}
+                                <span class="badge incomplete">Incomplete ({{ wager_sum }}/100)</span>
+                            {% else %}
+                                <span class="badge missing">Not Started</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <a href="{% url 'manage_wagers' tournament.pk team.pk %}" class="button small">Manage Wagers</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="actions">
+        <a href="{% url 'tournament_review' tournament.pk %}" class="button">Back to Tournament Review</a>
+    </div>
+{% endblock %}

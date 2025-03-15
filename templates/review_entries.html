@@ -3,37 +3,127 @@
 {% block title %}{{ tournament.name }} Review Entries{% endblock %}
 
 {% block content %}
-    <h2>{{ tournament.name }} Review Entries</h2>
+    <h2>{{ tournament.name }} Review</h2>
+
+    {% if current_round %}
+        <h3>Current Round: {{ current_round.round_number }}</h3>
+        <p>Started: {{ current_round.start_time|default:"Not set" }}</p>
+        
+        <div class="round-navigation">
+            <form method="post" action="{% url 'previous_round' tournament.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="button">Previous Round</button>
+            </form>
+            
+            <form method="post" action="{% url 'next_round' tournament.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="button">Next Round</button>
+            </form>
+        </div>
+        
+        <h3>Round {{ current_round.round_number }} Matchups</h3>
+        {% if matchups %}
+            <table class="matchup-table">
+                <thead>
+                    <tr>
+                        <th>Game</th>
+                        <th>Team 1</th>
+                        <th>Team 2</th>
+                        <th>Result</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for matchup in matchups %}
+                        <tr {% if matchup.conflict_flag %}class="conflict"{% endif %}>
+                            <td>{{ matchup.game.name }}</td>
+                            <td>{{ matchup.team1.name }} ({{ matchup.team1.team_number }})</td>
+                            <td>
+                                {% if matchup.is_bye %}
+                                    BYE
+                                {% else %}
+                                    {{ matchup.team2.name }} ({{ matchup.team2.team_number }})
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if matchup.result == 'TEAM1_WIN' %}
+                                    Team 1 Win
+                                {% elif matchup.result == 'TEAM2_WIN' %}
+                                    Team 2 Win
+                                {% else %}
+                                    Pending
+                                {% endif %}
+                                {% if matchup.conflict_flag %}
+                                    <span class="conflict-badge">CONFLICT</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'report_result' tournament.pk matchup.id %}" class="button small">Report Result</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No matchups found for this round.</p>
+        {% endif %}
+    {% else %}
+        <p>No active round found.</p>
+        
+        {% if not rounds %}
+            <div class="action-section">
+                <form method="post" action="{% url 'generate_matchups' tournament.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="button primary">Generate Matchups</button>
+                </form>
+            </div>
+        {% endif %}
+    {% endif %}
 
     <h3>Teams</h3>
-    <ul>
-        {% for team in teams %}
-            <li>{{ team.name }} - Members: {{ team.members }}</li>
-        {% endfor %}
-    </ul>
+    <table class="team-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Team Name</th>
+                <th>Members</th>
+                <th>Wins</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.team_number }}</td>
+                    <td>{{ team.name }}</td>
+                    <td>{{ team.members }}</td>
+                    <td>{{ team.get_wins }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <h3>Games</h3>
     {% if games %}
-        <ul>
+        <ul class="game-list">
             {% for game in games %}
                 <li>{{ game.name }} - {{ game.description }}</li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No games have been scheduled yet.</p>
+        <p>No games have been added yet.</p>
     {% endif %}
 
-    <form method="post" action="{% url 'generate_matchups' tournament.pk %}">
-        {% csrf_token %}
-        <button type="submit">Generate Matchups and Schedule</button>
-    </form>
-
-    <form method="post" action="{% url 'reset_tournament' tournament.pk %}">
-        {% csrf_token %}
-        <button type="submit">Reset Tournament</button>
-    </form>
-
-    <p><a href="{% url 'print_grids' tournament.pk %}">Print Grids</a></p>
-    <p><a href="{% url 'input_results' tournament.pk %}">Input Results</a></p>
-    <p><a href="{% url 'tournament_review' tournament.pk %}">Back to Tournament Review</a></p>
+    <div class="actions">
+        <a href="{% url 'print_grids' tournament.pk %}" class="button">Print Grids</a>
+        <a href="{% url 'input_results' tournament.pk %}" class="button">Input Results</a>
+        <a href="{% url 'tournament_standings' tournament.pk %}" class="button">View Standings</a>
+        <a href="{% url 'tournament_review' tournament.pk %}" class="button">Back to Tournament Review</a>
+    </div>
+    
+    <div class="danger-zone">
+        <form method="post" action="{% url 'reset_tournament' tournament.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="button danger" onclick="return confirm('Are you sure? This will reset all matchups and team assignments.')">Reset Tournament</button>
+        </form>
+    </div>
 {% endblock %}

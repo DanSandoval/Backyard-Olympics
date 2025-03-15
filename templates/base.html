@@ -1,11 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% load static %}  <!-- Add this line -->
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Backyard Olympics{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'tournaments/styles.css' %}">
+    <style>
+        /* Additional styles for the enhanced interface */
+        .dashboard-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .button.primary {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #45a049;
+        }
+        
+        .button.danger {
+            background-color: #f44336;
+            color: white;
+            border-color: #d32f2f;
+        }
+        
+        .button.small {
+            padding: 4px 8px;
+            font-size: 0.9em;
+        }
+        
+        .round-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .matchup-table, .team-table, .wager-table, .conflict-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .matchup-table th, .team-table th, .wager-table th, .conflict-table th,
+        .matchup-table td, .team-table td, .wager-table td, .conflict-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        .matchup-table th, .team-table th, .wager-table th, .conflict-table th {
+            background-color: #f2f2f2;
+        }
+        
+        tr.conflict {
+            background-color: #ffebee;
+        }
+        
+        .conflict-badge {
+            display: inline-block;
+            padding: 2px 5px;
+            background-color: #f44336;
+            color: white;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        .badge.win {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .badge.loss {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        
+        .wager-input {
+            width: 60px;
+            text-align: center;
+        }
+        
+        .valid {
+            color: #4CAF50;
+        }
+        
+        .invalid {
+            color: #f44336;
+        }
+        
+        .notifications {
+            background-color: #fff8e1;
+        }
+        
+        .notifications li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ffe0b2;
+            border-radius: 3px;
+            background-color: #fffde7;
+        }
+        
+        .danger-zone {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px dashed #f44336;
+            border-radius: 5px;
+        }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -22,6 +159,16 @@
         </nav>
     </header>
     <main>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
         {% block content %}{% endblock %}
     </main>
     <footer>
